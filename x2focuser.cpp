@@ -147,18 +147,18 @@ void X2Focuser::deviceInfoModel(BasicStringInterface& str)
 int	X2Focuser::establishLink(void)
 {
     char szPort[DRIVER_MAX_STRING];
-    int err;
+    int nErr;
 
     X2MutexLocker ml(GetMutex());
     // get serial port device name
     portNameOnToCharPtr(szPort,DRIVER_MAX_STRING);
-    err = m_Aaf2Controller.Connect(szPort);
-    if(err)
+    nErr = m_Aaf2Controller.Connect(szPort);
+    if(nErr)
         m_bLinked = false;
     else
         m_bLinked = true;
 
-    return err;
+    return nErr;
 }
 
 int	X2Focuser::terminateLink(void)
@@ -284,16 +284,16 @@ void X2Focuser::uiEvent(X2GUIExchangeInterface* uiex, const char* pszEvent)
 #pragma mark - FocuserGotoInterface2
 int	X2Focuser::focPosition(int& nPosition)
 {
-    int err;
+    int nErr;
 
     if(!m_bLinked)
         return NOT_CONNECTED;
 
     X2MutexLocker ml(GetMutex());
 
-    err = m_Aaf2Controller.getPosition(nPosition);
+    nErr = m_Aaf2Controller.getPosition(nPosition);
     m_nPosition = nPosition;
-    return err;
+    return nErr;
 }
 
 int	X2Focuser::focMinimumLimit(int& nMinLimit) 		
@@ -315,14 +315,14 @@ int	X2Focuser::focMaximumLimit(int& nPosLimit)
 }
 
 int	X2Focuser::focAbort()								
-{   int err;
+{   int nErr;
 
     if(!m_bLinked)
         return NOT_CONNECTED;
 
     X2MutexLocker ml(GetMutex());
-    err = m_Aaf2Controller.haltFocuser();
-    return err;
+    nErr = m_Aaf2Controller.haltFocuser();
+    return nErr;
 }
 
 int	X2Focuser::startFocGoto(const int& nRelativeOffset)	
@@ -337,7 +337,7 @@ int	X2Focuser::startFocGoto(const int& nRelativeOffset)
 
 int	X2Focuser::isCompleteFocGoto(bool& bComplete) const
 {
-    int err;
+    int nErr;
 
     if(!m_bLinked)
         return NOT_CONNECTED;
@@ -345,20 +345,20 @@ int	X2Focuser::isCompleteFocGoto(bool& bComplete) const
     X2Focuser* pMe = (X2Focuser*)this;
     X2MutexLocker ml(pMe->GetMutex());
 
-    err = pMe->m_Aaf2Controller.isGoToComplete(bComplete);
+    nErr = pMe->m_Aaf2Controller.isGoToComplete(bComplete);
 
-    return err;
+    return nErr;
 }
 
 int	X2Focuser::endFocGoto(void)
 {
-    int err;
+    int nErr;
     if(!m_bLinked)
         return NOT_CONNECTED;
 
     X2MutexLocker ml(GetMutex());
-    err = m_Aaf2Controller.getPosition(m_nPosition);
-    return err;
+    nErr = m_Aaf2Controller.getPosition(m_nPosition);
+    return nErr;
 }
 
 int X2Focuser::amountCountFocGoto(void) const					
@@ -386,7 +386,7 @@ int	X2Focuser::amountIndexFocGoto(void)
 #pragma mark - FocuserTemperatureInterface
 int X2Focuser::focTemperature(double &dTemperature)
 {
-    int err;
+    int nErr = SB_OK;
 
     if(!m_bLinked) {
         dTemperature = -100.0;
@@ -399,13 +399,13 @@ int X2Focuser::focTemperature(double &dTemperature)
     static CStopWatch timer;
 
     if(timer.GetElapsedSeconds() > 30.0f || m_fLastTemp < -99.0f) {
-        err = m_Aaf2Controller.getTemperature(m_fLastTemp);
+        nErr = m_Aaf2Controller.getTemperature(m_fLastTemp);
         timer.Reset();
     }
 
     dTemperature = m_fLastTemp;
 
-    return err;
+    return nErr;
 }
 
 #pragma mark - SerialPortParams2Interface

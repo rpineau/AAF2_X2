@@ -19,14 +19,12 @@ fi
 
 cp "./focuserlist aaf2.txt" "$TheSkyX_Path/Resources/Common/Miscellaneous Files/"
 cp "./aaf2.ui" "$TheSkyX_Path/Resources/Common/PlugInsARM32/FocuserPlugins/"
-# cp "./PegasusAstro.png" "$TheSkyX_Path/Resources/Common/PlugInsARM32/FocuserPlugins/"
 cp "./libaaf2.so" "$TheSkyX_Path/Resources/Common/PlugInsARM32/FocuserPlugins/"
 
 app_owner=`/usr/bin/stat -c "%u" "$TheSkyX_Path" | xargs id -n -u`
 if [ ! -z "$app_owner" ]; then
 	chown $app_owner "$TheSkyX_Path/Resources/Common/Miscellaneous Files/focuserlist aaf2.txt"
 	chown $app_owner "$TheSkyX_Path/Resources/Common/PlugInsARM32/FocuserPlugins/aaf2.ui"
-#	chown $app_owner "$TheSkyX_Path/Resources/Common/PlugInsARM32/FocuserPlugins/PegasusAstro.png"
 	chown $app_owner "$TheSkyX_Path/Resources/Common/PlugInsARM32/FocuserPlugins/libaaf2.so"
 fi
 chmod  755 "$TheSkyX_Path/Resources/Common/PlugInsARM32/FocuserPlugins/libaaf2.so"

@@ -2,7 +2,6 @@
 
 mkdir -p ROOT/tmp/aaf2_X2/
 cp "../aaf2.ui" ROOT/tmp/aaf2_X2/
-# cp "../PegasusAstro.png" ROOT/tmp/aaf2_X2/
 cp "../focuserlist aaf2.txt" ROOT/tmp/aaf2_X2/
 cp "../build/Release/libaaf2.dylib" ROOT/tmp/aaf2_X2/
 

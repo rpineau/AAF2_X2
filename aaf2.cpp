@@ -216,7 +216,7 @@ int CAaf2Controller::moveRelativeToPosision(int nSteps)
 #endif
 
     m_nTargetPos = m_nCurPos + nSteps;
-    gotoPosition(m_nTargetPos);
+    nErr = gotoPosition(m_nTargetPos);
     return nErr;
 }
 

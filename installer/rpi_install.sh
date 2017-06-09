@@ -27,4 +27,4 @@ if [ ! -z "$app_owner" ]; then
 	chown $app_owner "$TheSkyX_Path/Resources/Common/PlugInsARM32/FocuserPlugIns/aaf2.ui"
 	chown $app_owner "$TheSkyX_Path/Resources/Common/PlugInsARM32/FocuserPlugIns/libaaf2.so"
 fi
-chmod  755 "$TheSkyX_Path/Resources/Common/PlugInsARM32/FocuserPlugins/libaaf2.so"
+chmod  755 "$TheSkyX_Path/Resources/Common/PlugInsARM32/FocuserPlugIns/libaaf2.so"

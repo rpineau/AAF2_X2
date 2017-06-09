@@ -5,3 +5,5 @@ build
 *.sdf
 .vs
 Release
+*.pkg
+*.so

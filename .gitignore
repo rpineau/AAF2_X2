@@ -1,4 +1,5 @@
 *.xcuserdatad
+*.xcworkspace
 .DS_Store
 build
 *.opensdf

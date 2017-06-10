@@ -304,12 +304,15 @@ int	X2Focuser::focMinimumLimit(int& nMinLimit)
 
 int	X2Focuser::focMaximumLimit(int& nPosLimit)			
 {
-    X2MutexLocker ml(GetMutex());
+
+	X2MutexLocker ml(GetMutex());
     if(m_Aaf2Controller.isPosLimitEnabled()) {
         nPosLimit = m_Aaf2Controller.getPosLimit();
     }
-    else
-        nPosLimit = 99999999;
+	else {
+		nPosLimit = 100000;
+	}
+	printf("focMaximumLimit nPosLimit = %d\n", nPosLimit);
 
     return SB_OK;
 }

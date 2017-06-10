@@ -582,7 +582,9 @@ int CAaf2Controller::readResponse(char *pszRespBuffer, int nBufferLen)
         }
     } while (*pszBufPtr++ != '#' && ulTotalBytesRead < nBufferLen );
 
-    *(pszBufPtr-1) = 0; //remove the #
+    if(ulTotalBytesRead)
+        *(pszBufPtr-1) = 0; //remove the #
+
     return nErr;
 }
 

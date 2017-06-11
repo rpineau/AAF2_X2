@@ -142,6 +142,7 @@ int CAaf2Controller::haltFocuser()
         // parse output to update m_curPos
         parseResponse(szResp, szTmpBuf, SERIAL_BUFFER_SIZE);
         m_nCurPos = atoi(szTmpBuf);
+		m_nTargetPos = m_nCurPos;
     } catch (const std::exception& e) {
         nErr = ERR_CMDFAILED;
         if (m_bDebugLog && m_pLogger) {

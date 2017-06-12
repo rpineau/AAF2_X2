@@ -245,9 +245,7 @@ int CAaf2Controller::isMotorMoving(bool &bMoving)
 	
 	if(!m_bIsConnected)
 		return ERR_COMMNOLINK;
-	
 
-    // OK_SMFC or OK_DMFC
     nErr = aaf2Command("M#", szResp, SERIAL_BUFFER_SIZE);
     if(nErr)
         return nErr;
@@ -296,7 +294,6 @@ int CAaf2Controller::getDeviceStatus(int &nStatus)
 		return ERR_COMMNOLINK;
 	
 
-    // OK_SMFC or OK_DMFC
     nErr = aaf2Command("#", szResp, SERIAL_BUFFER_SIZE);
     if(nErr)
         return nErr;

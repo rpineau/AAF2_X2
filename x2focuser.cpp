@@ -312,9 +312,8 @@ int	X2Focuser::focMaximumLimit(int& nPosLimit)
 	else {
 		nPosLimit = 100000;
 	}
-	printf("focMaximumLimit nPosLimit = %d\n", nPosLimit);
 
-    return SB_OK;
+	return SB_OK;
 }
 
 int	X2Focuser::focAbort()								

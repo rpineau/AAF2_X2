@@ -138,32 +138,14 @@ int CAaf2Controller::haltFocuser()
 		return ERR_COMMNOLINK;
 
     nErr = aaf2Command("H#", szResp, SERIAL_BUFFER_SIZE);
-    try {
-        // parse output to update m_curPos
-        parseResponse(szResp, szTmpBuf, SERIAL_BUFFER_SIZE);
-        m_nCurPos = atoi(szTmpBuf);
-		m_nTargetPos = m_nCurPos;
-    } catch (const std::exception& e) {
-        nErr = ERR_CMDFAILED;
-        if (m_bDebugLog && m_pLogger) {
-            snprintf(m_szLogBuffer,LOG_BUFFER_SIZE,"[CAaf2Controller::haltFocuser] Exception: %s\n%s\n",e.what(), szResp);
-            m_pLogger->out(m_szLogBuffer);
-        }
-    } catch (...) {
-        nErr = ERR_CMDFAILED;
-        if (m_bDebugLog && m_pLogger) {
-            snprintf(m_szLogBuffer,LOG_BUFFER_SIZE,"[CAaf2Controller::haltFocuser] Exception: %s\n",szResp);
-            m_pLogger->out(m_szLogBuffer);
-        }
-#ifdef AAF2_DEBUG
-        ltime = time(NULL);
-        timestamp = asctime(localtime(&ltime));
-        timestamp[strlen(timestamp) - 1] = 0;
-        fprintf(Logfile, "[%s] CAaf2Controller::haltFocuser **** Exception ****  : %s\n", timestamp, szResp);
-        fflush(Logfile);
-#endif
-    }
+    if(nErr)
         return nErr;
+    // parse output to update m_curPos
+    parseResponse(szResp, szTmpBuf, SERIAL_BUFFER_SIZE);
+    m_nCurPos = atoi(szTmpBuf);
+    m_nTargetPos = m_nCurPos;
+
+    return nErr;
 }
 
 int CAaf2Controller::gotoPosition(int nPos)
@@ -249,37 +231,16 @@ int CAaf2Controller::isMotorMoving(bool &bMoving)
     nErr = aaf2Command("M#", szResp, SERIAL_BUFFER_SIZE);
     if(nErr)
         return nErr;
-    try {
-        if(strstr(szResp,"OK")) { // positive response, check M value
-            if(strstr(szResp,"M0")) {
-                bMoving = false;
-            }
-            else if (strstr(szResp,"M1")) {
-                bMoving = true;
-            }
-            else
-                nErr = ERR_CMDFAILED;
+    if(strstr(szResp,"OK")) { // positive response, check M value
+        if(strstr(szResp,"M0")) {
+            bMoving = false;
         }
-    } catch (const std::exception& e) {
-        nErr = ERR_CMDFAILED;
-        if (m_bDebugLog && m_pLogger) {
-            snprintf(m_szLogBuffer,LOG_BUFFER_SIZE,"[CAaf2Controller::isMotorMoving] Exception: %s\n%s\n",e.what(), szResp);
-            m_pLogger->out(m_szLogBuffer);
+        else if (strstr(szResp,"M1")) {
+            bMoving = true;
         }
-	} catch (...) {
-		nErr = ERR_CMDFAILED;
-		if (m_bDebugLog && m_pLogger) {
-			snprintf(m_szLogBuffer,LOG_BUFFER_SIZE,"[CAaf2Controller::isMotorMoving] Exception: %s\n",szResp);
-			m_pLogger->out(m_szLogBuffer);
-		}
-#ifdef AAF2_DEBUG
-		ltime = time(NULL);
-		timestamp = asctime(localtime(&ltime));
-		timestamp[strlen(timestamp) - 1] = 0;
-		fprintf(Logfile, "[%s] CAaf2Controller::isMotorMoving **** Exception ****  : %s\n", timestamp, szResp);
-		fflush(Logfile);
-#endif
-	}
+        else
+            nErr = ERR_CMDFAILED;
+    }
 
     return nErr;
 }
@@ -348,31 +309,10 @@ int CAaf2Controller::getTemperature(double &dTemperature)
     if(nErr)
         return nErr;
 
-    try {
-        // parse output to extract temp value.
-        nErr = parseResponse(szResp, szTmpBuf, SERIAL_BUFFER_SIZE);
-        // convert string value to double
-        dTemperature = atof(szTmpBuf);
-    } catch (const std::exception& e) {
-        nErr = ERR_CMDFAILED;
-        if (m_bDebugLog && m_pLogger) {
-            snprintf(m_szLogBuffer,LOG_BUFFER_SIZE,"[CAaf2Controller::getTemperature] Exception: %s\n%s\n",e.what(), szResp);
-            m_pLogger->out(m_szLogBuffer);
-        }
-	} catch (...) {
-		nErr = ERR_CMDFAILED;
-		if (m_bDebugLog && m_pLogger) {
-			snprintf(m_szLogBuffer,LOG_BUFFER_SIZE,"[CAaf2Controller::getTemperature] Exception: %s\n",szResp);
-			m_pLogger->out(m_szLogBuffer);
-		}
-#ifdef AAF2_DEBUG
-		ltime = time(NULL);
-		timestamp = asctime(localtime(&ltime));
-		timestamp[strlen(timestamp) - 1] = 0;
-		fprintf(Logfile, "[%s] CAaf2Controller::getTemperature **** Exception ****  : %s\n", timestamp, szResp);
-		fflush(Logfile);
-#endif
-	}
+    // parse output to extract temp value.
+    nErr = parseResponse(szResp, szTmpBuf, SERIAL_BUFFER_SIZE);
+    // convert string value to double
+    dTemperature = atof(szTmpBuf);
 
     return nErr;
 }
@@ -390,32 +330,11 @@ int CAaf2Controller::getPosition(int &nPosition)
     if(nErr)
         return nErr;
 
-    try {
-        // parse output to extract position value.
-        nErr = parseResponse(szResp, szTmpBuf, SERIAL_BUFFER_SIZE);
-        // convert response
-        nPosition = atoi(szTmpBuf);
-        m_nCurPos = nPosition;
-    } catch (const std::exception& e) {
-        nErr = ERR_CMDFAILED;
-        if (m_bDebugLog && m_pLogger) {
-            snprintf(m_szLogBuffer,LOG_BUFFER_SIZE,"[CAaf2Controller::getPosition] Exception: %s\n%s\n",e.what(), szResp);
-            m_pLogger->out(m_szLogBuffer);
-        }
-	} catch (...) {
-		nErr = ERR_CMDFAILED;
-		if (m_bDebugLog && m_pLogger) {
-			snprintf(m_szLogBuffer,LOG_BUFFER_SIZE,"[CAaf2Controller::getPosition] Exception: %s\n",szResp);
-			m_pLogger->out(m_szLogBuffer);
-		}
-#ifdef AAF2_DEBUG
-		ltime = time(NULL);
-		timestamp = asctime(localtime(&ltime));
-		timestamp[strlen(timestamp) - 1] = 0;
-		fprintf(Logfile, "[%s] CAaf2Controller::getPosition **** Exception ****  : %s\n", timestamp, szResp);
-		fflush(Logfile);
-#endif
-	}
+    // parse output to extract position value.
+    nErr = parseResponse(szResp, szTmpBuf, SERIAL_BUFFER_SIZE);
+    // convert response
+    nPosition = atoi(szTmpBuf);
+    m_nCurPos = nPosition;
 
     return nErr;
 }

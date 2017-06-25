@@ -167,6 +167,7 @@ int	X2Focuser::terminateLink(void)
         return SB_OK;
 
     X2MutexLocker ml(GetMutex());
+    m_Aaf2Controller.haltFocuser();
     m_Aaf2Controller.Disconnect();
     m_bLinked = false;
     return SB_OK;

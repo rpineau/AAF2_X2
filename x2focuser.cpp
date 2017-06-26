@@ -31,7 +31,7 @@ X2Focuser::X2Focuser(const char* pszDisplayName,
 	m_pLogger						= pLoggerIn;	
 	m_pIOMutex						= pIOMutexIn;
 	m_pTickCount					= pTickCountIn;
-
+	
 	m_bLinked = false;
 	m_nPosition = 0;
     m_fLastTemp = -273.15f; // aboslute zero :)
@@ -44,7 +44,6 @@ X2Focuser::X2Focuser(const char* pszDisplayName,
 	m_Aaf2Controller.SetSerxPointer(m_pSerX);
 	m_Aaf2Controller.setLogger(m_pLogger);
     m_Aaf2Controller.setSleeper(m_pSleeper);
-
 }
 
 X2Focuser::~X2Focuser()
@@ -170,7 +169,8 @@ int	X2Focuser::terminateLink(void)
     m_Aaf2Controller.haltFocuser();
     m_Aaf2Controller.Disconnect();
     m_bLinked = false;
-    return SB_OK;
+
+	return SB_OK;
 }
 
 bool X2Focuser::isLinked(void) const
@@ -347,8 +347,7 @@ int	X2Focuser::isCompleteFocGoto(bool& bComplete) const
 
     X2Focuser* pMe = (X2Focuser*)this;
     X2MutexLocker ml(pMe->GetMutex());
-
-    nErr = pMe->m_Aaf2Controller.isGoToComplete(bComplete);
+	nErr = pMe->m_Aaf2Controller.isGoToComplete(bComplete);
 
     return nErr;
 }

@@ -170,7 +170,7 @@ int CAaf2Controller::gotoPosition(int nPos)
     fflush(Logfile);
 #endif
 
-    sprintf(szCmd,"T%d#", nPos);
+    snprintf(szCmd, SERIAL_BUFFER_SIZE, "T%d#", nPos);
     nErr = aaf2Command(szCmd, szResp, SERIAL_BUFFER_SIZE);
     if(nErr)
         return nErr;

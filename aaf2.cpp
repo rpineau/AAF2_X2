@@ -14,6 +14,9 @@
 #ifdef SB_MAC_BUILD
 #include <unistd.h>
 #endif
+#ifdef SB_WIN_BUILD
+#include <time.h>
+#endif
 
 
 CAaf2Controller::CAaf2Controller()

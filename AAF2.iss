@@ -48,6 +48,7 @@ Source: "aaf2.ui"; DestDir: "{app}\Plugins\FocuserPlugins"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 ; msgBox('Do you want to install MyProg.exe to ' + ExtractFilePath(CurrentFileName) + '?', mbConfirmation, MB_YESNO)
 
+
 [Code]
 {* Below is a function to read TheSkyXInstallPath.txt and confirm that the directory does exist
    This is then used in the DefaultDirName above

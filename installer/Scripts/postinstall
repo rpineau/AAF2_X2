@@ -24,7 +24,6 @@ else
 	PLUGINS_DIR="PlugIns"
 fi
 
-echo "Installing in $TheSkyX_Path/Resources/Common/$PLUGINS_DIR/FocuserPlugIns/"
 
 mkdir -p "$TheSkyX_Path/Resources/Common/$PLUGINS_DIR/FocuserPlugIns/"
 

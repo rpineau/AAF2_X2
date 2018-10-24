@@ -25,7 +25,7 @@ else
 fi
 
 
-mkdir -p "$TheSkyX_Path/Resources/Common/$PLUGINS_DIR/FocuserPlugIns/"
+echo "Installing in $TheSkyX_Path/Resources/Common/$PLUGINS_DIR/FocuserPlugIns/"
 
 cp "/tmp/aaf2_X2/focuserlist aaf2.txt" "$TheSkyX_Path/Resources/Common/Miscellaneous Files/"
 if [ "$?" -ne "0" ]; then exit 1; fi

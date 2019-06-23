@@ -225,15 +225,15 @@ int	X2Focuser::execModalSettingsDialog(void)
         dx->setEnabled("pushButtonSet2", false);
     }
 
-    // linit is done in software so it's always enabled.
-    dx->setEnabled("posLimit", true);
-    dx->setEnabled("limitEnable", true);
-    dx->setPropertyInt("posLimit", "value", m_Aaf2Controller.getPosLimit());
-    if(m_Aaf2Controller.isPosLimitEnabled())
-        dx->setChecked("limitEnable", true);
-    else
-        dx->setChecked("limitEnable", false);
-
+	// limit is done in software so it's always enabled.
+	dx->setEnabled("posLimit", true);
+	dx->setEnabled("limitEnable", true);
+	dx->setPropertyInt("posLimit", "value", m_Aaf2Controller.getPosLimit());
+	if(m_Aaf2Controller.isPosLimitEnabled())
+		dx->setChecked("limitEnable", true);
+	else
+		dx->setChecked("limitEnable", false);
+	
 
 
     //Display the user interface
@@ -249,7 +249,6 @@ int	X2Focuser::execModalSettingsDialog(void)
         bLimitEnabled = dx->isChecked("limitEnable");
         dx->propertyInt("posLimit", "value", nPosLimit);
         if(bLimitEnabled && nPosLimit>0) { // a position limit of 0 doesn't make sense :)
-            printf("Setting pos limit to %d\n", nPosLimit);
             m_Aaf2Controller.setPosLimit(nPosLimit);
             m_Aaf2Controller.enablePosLimit(bLimitEnabled);
         } else {

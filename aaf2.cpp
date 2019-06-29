@@ -71,7 +71,7 @@ int CAaf2Controller::Connect(const char *pszPort)
 	fflush(Logfile);
 #endif
 
-    // 19200 8N1
+    // 9600 8N1
     nErr = m_pSerx->open(pszPort, 9600, SerXInterface::B_NOPARITY, "-DTR_CONTROL 1");
     if( nErr == 0)
         m_bIsConnected = true;

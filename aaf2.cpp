@@ -14,6 +14,9 @@
 #ifdef SB_MAC_BUILD
 #include <unistd.h>
 #endif
+#ifdef SB_WIN_BUILD
+#include <time.h>
+#endif
 
 
 CAaf2Controller::CAaf2Controller()
@@ -68,14 +71,15 @@ int CAaf2Controller::Connect(const char *pszPort)
 	fflush(Logfile);
 #endif
 
-    // 19200 8N1
-    if(m_pSerx->open(pszPort, 9600, SerXInterface::B_NOPARITY, "-DTR_CONTROL 1") == 0)
+    // 9600 8N1
+    nErr = m_pSerx->open(pszPort, 9600, SerXInterface::B_NOPARITY, "-DTR_CONTROL 1");
+    if( nErr == 0)
         m_bIsConnected = true;
     else
         m_bIsConnected = false;
 
     if(!m_bIsConnected)
-        return ERR_COMMNOLINK;
+        return nErr;
 
     m_pSleeper->sleep(2000);
 
@@ -86,7 +90,7 @@ int CAaf2Controller::Connect(const char *pszPort)
 	fprintf(Logfile, "[%s] CAaf2Controller::Connect connected to %s\n", timestamp, pszPort);
 	fflush(Logfile);
 #endif
-	
+
     if (m_bDebugLog && m_pLogger) {
         snprintf(m_szLogBuffer,LOG_BUFFER_SIZE,"[CAaf2Controller::Connect] Connected.\n");
         m_pLogger->out(m_szLogBuffer);
@@ -123,7 +127,7 @@ void CAaf2Controller::Disconnect()
 {
     if(m_bIsConnected && m_pSerx)
         m_pSerx->close();
- 
+
 	m_bIsConnected = false;
 }
 
@@ -134,37 +138,20 @@ int CAaf2Controller::haltFocuser()
     char szResp[SERIAL_BUFFER_SIZE];
     char szTmpBuf[SERIAL_BUFFER_SIZE];
 
-	if(!m_bIsConnected)
-		return ERR_COMMNOLINK;
+        if(!m_bIsConnected)
+                return ERR_COMMNOLINK;
 
     nErr = aaf2Command("H#", szResp, SERIAL_BUFFER_SIZE);
-    try {
-        // parse output to update m_curPos
-        parseResponse(szResp, szTmpBuf, SERIAL_BUFFER_SIZE);
-        m_nCurPos = atoi(szTmpBuf);
-		m_nTargetPos = m_nCurPos;
-    } catch (const std::exception& e) {
-        nErr = ERR_CMDFAILED;
-        if (m_bDebugLog && m_pLogger) {
-            snprintf(m_szLogBuffer,LOG_BUFFER_SIZE,"[CAaf2Controller::haltFocuser] Exception: %s\n%s\n",e.what(), szResp);
-            m_pLogger->out(m_szLogBuffer);
-        }
-    } catch (...) {
-        nErr = ERR_CMDFAILED;
-        if (m_bDebugLog && m_pLogger) {
-            snprintf(m_szLogBuffer,LOG_BUFFER_SIZE,"[CAaf2Controller::haltFocuser] Exception: %s\n",szResp);
-            m_pLogger->out(m_szLogBuffer);
-        }
-#ifdef AAF2_DEBUG
-        ltime = time(NULL);
-        timestamp = asctime(localtime(&ltime));
-        timestamp[strlen(timestamp) - 1] = 0;
-        fprintf(Logfile, "[%s] CAaf2Controller::haltFocuser **** Exception ****  : %s\n", timestamp, szResp);
-        fflush(Logfile);
-#endif
-    }
+    if(nErr)
         return nErr;
+    // parse output to update m_curPos
+    parseResponse(szResp, szTmpBuf, SERIAL_BUFFER_SIZE);
+    m_nCurPos = atoi(szTmpBuf);
+    m_nTargetPos = m_nCurPos;
+
+    return nErr;
 }
+
 
 int CAaf2Controller::gotoPosition(int nPos)
 {
@@ -188,7 +175,7 @@ int CAaf2Controller::gotoPosition(int nPos)
     fflush(Logfile);
 #endif
 
-    sprintf(szCmd,"T%d#", nPos);
+    snprintf(szCmd, SERIAL_BUFFER_SIZE, "T%d#", nPos);
     nErr = aaf2Command(szCmd, szResp, SERIAL_BUFFER_SIZE);
     if(nErr)
         return nErr;
@@ -226,7 +213,7 @@ int CAaf2Controller::moveRelativeToPosision(int nSteps)
 int CAaf2Controller::isGoToComplete(bool &bComplete)
 {
     int nErr = AAF2_OK;
-	
+
 	if(!m_bIsConnected)
 		return ERR_COMMNOLINK;
 
@@ -242,46 +229,23 @@ int CAaf2Controller::isMotorMoving(bool &bMoving)
 {
     int nErr = AAF2_OK;
     char szResp[SERIAL_BUFFER_SIZE];
-	
+
 	if(!m_bIsConnected)
 		return ERR_COMMNOLINK;
-	
 
-    // OK_SMFC or OK_DMFC
     nErr = aaf2Command("M#", szResp, SERIAL_BUFFER_SIZE);
     if(nErr)
         return nErr;
-    try {
-        if(strstr(szResp,"OK")) { // positive response, check M value
-            if(strstr(szResp,"M0")) {
-                bMoving = false;
-            }
-            else if (strstr(szResp,"M1")) {
-                bMoving = true;
-            }
-            else
-                nErr = ERR_CMDFAILED;
+    if(strstr(szResp,"OK")) { // positive response, check M value
+        if(strstr(szResp,"M0")) {
+            bMoving = false;
         }
-    } catch (const std::exception& e) {
-        nErr = ERR_CMDFAILED;
-        if (m_bDebugLog && m_pLogger) {
-            snprintf(m_szLogBuffer,LOG_BUFFER_SIZE,"[CAaf2Controller::isMotorMoving] Exception: %s\n%s\n",e.what(), szResp);
-            m_pLogger->out(m_szLogBuffer);
+        else if (strstr(szResp,"M1")) {
+            bMoving = true;
         }
-	} catch (...) {
-		nErr = ERR_CMDFAILED;
-		if (m_bDebugLog && m_pLogger) {
-			snprintf(m_szLogBuffer,LOG_BUFFER_SIZE,"[CAaf2Controller::isMotorMoving] Exception: %s\n",szResp);
-			m_pLogger->out(m_szLogBuffer);
-		}
-#ifdef AAF2_DEBUG
-		ltime = time(NULL);
-		timestamp = asctime(localtime(&ltime));
-		timestamp[strlen(timestamp) - 1] = 0;
-		fprintf(Logfile, "[%s] CAaf2Controller::isMotorMoving **** Exception ****  : %s\n", timestamp, szResp);
-		fflush(Logfile);
-#endif
-	}
+        else
+            nErr = ERR_CMDFAILED;
+    }
 
     return nErr;
 }
@@ -291,12 +255,11 @@ int CAaf2Controller::getDeviceStatus(int &nStatus)
 {
     int nErr;
     char szResp[SERIAL_BUFFER_SIZE];
-	
+
 	if(!m_bIsConnected)
 		return ERR_COMMNOLINK;
-	
 
-    // OK_SMFC or OK_DMFC
+
     nErr = aaf2Command("#", szResp, SERIAL_BUFFER_SIZE);
     if(nErr)
         return nErr;
@@ -316,7 +279,7 @@ int CAaf2Controller::getFirmwareVersion(char *pszVersion, int nStrMaxLen)
 {
     int nErr = AAF2_OK;
     char szResp[SERIAL_BUFFER_SIZE];
-	
+
 	if(!m_bIsConnected)
 		return ERR_COMMNOLINK;
 
@@ -351,31 +314,10 @@ int CAaf2Controller::getTemperature(double &dTemperature)
     if(nErr)
         return nErr;
 
-    try {
-        // parse output to extract temp value.
-        nErr = parseResponse(szResp, szTmpBuf, SERIAL_BUFFER_SIZE);
-        // convert string value to double
-        dTemperature = atof(szTmpBuf);
-    } catch (const std::exception& e) {
-        nErr = ERR_CMDFAILED;
-        if (m_bDebugLog && m_pLogger) {
-            snprintf(m_szLogBuffer,LOG_BUFFER_SIZE,"[CAaf2Controller::getTemperature] Exception: %s\n%s\n",e.what(), szResp);
-            m_pLogger->out(m_szLogBuffer);
-        }
-	} catch (...) {
-		nErr = ERR_CMDFAILED;
-		if (m_bDebugLog && m_pLogger) {
-			snprintf(m_szLogBuffer,LOG_BUFFER_SIZE,"[CAaf2Controller::getTemperature] Exception: %s\n",szResp);
-			m_pLogger->out(m_szLogBuffer);
-		}
-#ifdef AAF2_DEBUG
-		ltime = time(NULL);
-		timestamp = asctime(localtime(&ltime));
-		timestamp[strlen(timestamp) - 1] = 0;
-		fprintf(Logfile, "[%s] CAaf2Controller::getTemperature **** Exception ****  : %s\n", timestamp, szResp);
-		fflush(Logfile);
-#endif
-	}
+    // parse output to extract temp value.
+    nErr = parseResponse(szResp, szTmpBuf, SERIAL_BUFFER_SIZE);
+    // convert string value to double
+    dTemperature = atof(szTmpBuf);
 
     return nErr;
 }
@@ -393,32 +335,11 @@ int CAaf2Controller::getPosition(int &nPosition)
     if(nErr)
         return nErr;
 
-    try {
-        // parse output to extract position value.
-        nErr = parseResponse(szResp, szTmpBuf, SERIAL_BUFFER_SIZE);
-        // convert response
-        nPosition = atoi(szTmpBuf);
-        m_nCurPos = nPosition;
-    } catch (const std::exception& e) {
-        nErr = ERR_CMDFAILED;
-        if (m_bDebugLog && m_pLogger) {
-            snprintf(m_szLogBuffer,LOG_BUFFER_SIZE,"[CAaf2Controller::getPosition] Exception: %s\n%s\n",e.what(), szResp);
-            m_pLogger->out(m_szLogBuffer);
-        }
-	} catch (...) {
-		nErr = ERR_CMDFAILED;
-		if (m_bDebugLog && m_pLogger) {
-			snprintf(m_szLogBuffer,LOG_BUFFER_SIZE,"[CAaf2Controller::getPosition] Exception: %s\n",szResp);
-			m_pLogger->out(m_szLogBuffer);
-		}
-#ifdef AAF2_DEBUG
-		ltime = time(NULL);
-		timestamp = asctime(localtime(&ltime));
-		timestamp[strlen(timestamp) - 1] = 0;
-		fprintf(Logfile, "[%s] CAaf2Controller::getPosition **** Exception ****  : %s\n", timestamp, szResp);
-		fflush(Logfile);
-#endif
-	}
+    // parse output to extract position value.
+    nErr = parseResponse(szResp, szTmpBuf, SERIAL_BUFFER_SIZE);
+    // convert response
+    nPosition = atoi(szTmpBuf);
+    m_nCurPos = nPosition;
 
     return nErr;
 }
@@ -435,7 +356,7 @@ int CAaf2Controller::syncMotorPosition(int nPos)
 
     snprintf(szCmd, SERIAL_BUFFER_SIZE, "I%d#", nPos);
     printf("setting new pos to %d [ %s ]\n",nPos, szCmd);
-    
+
     nErr = aaf2Command(szCmd, szResp, SERIAL_BUFFER_SIZE);
     printf("[syncMotorPosition] szResp = %s\n", szResp);
     if(nErr)
@@ -478,7 +399,7 @@ int CAaf2Controller::aaf2Command(const char *pszszCmd, char *pszResult, int nRes
     int nErr = AAF2_OK;
     char szResp[SERIAL_BUFFER_SIZE];
     unsigned long  ulBytesWrite;
-	
+
 	if(!m_bIsConnected)
 		return ERR_COMMNOLINK;
 
@@ -544,7 +465,7 @@ int CAaf2Controller::readResponse(char *pszRespBuffer, int nBufferLen)
     unsigned long ulBytesRead = 0;
     unsigned long ulTotalBytesRead = 0;
     char *pszBufPtr;
-	
+
 	if(!m_bIsConnected)
 		return ERR_COMMNOLINK;
 

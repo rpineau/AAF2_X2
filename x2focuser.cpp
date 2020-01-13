@@ -13,10 +13,10 @@
 #include "../../licensedinterfaces/sberrorx.h"
 #include "../../licensedinterfaces/serialportparams2interface.h"
 
-X2Focuser::X2Focuser(const char* pszDisplayName, 
+X2Focuser::X2Focuser(const char* pszDisplayName,
 												const int& nInstanceIndex,
-												SerXInterface						* pSerXIn, 
-												TheSkyXFacadeForDriversInterface	* pTheSkyXIn, 
+												SerXInterface						* pSerXIn,
+												TheSkyXFacadeForDriversInterface	* pTheSkyXIn,
 												SleeperInterface					* pSleeperIn,
 												BasicIniUtilInterface				* pIniUtilIn,
 												LoggerInterface						* pLoggerIn,
@@ -24,11 +24,11 @@ X2Focuser::X2Focuser(const char* pszDisplayName,
 												TickCountInterface					* pTickCountIn)
 
 {
-	m_pSerX							= pSerXIn;		
+	m_pSerX							= pSerXIn;
 	m_pTheSkyXForMounts				= pTheSkyXIn;
 	m_pSleeper						= pSleeperIn;
 	m_pIniUtil						= pIniUtilIn;
-	m_pLogger						= pLoggerIn;	
+	m_pLogger						= pLoggerIn;
 	m_pIOMutex						= pIOMutexIn;
 	m_pTickCount					= pTickCountIn;
 
@@ -44,7 +44,6 @@ X2Focuser::X2Focuser(const char* pszDisplayName,
 	m_Aaf2Controller.SetSerxPointer(m_pSerX);
 	m_Aaf2Controller.setLogger(m_pLogger);
     m_Aaf2Controller.setSleeper(m_pSleeper);
-
 }
 
 X2Focuser::~X2Focuser()
@@ -104,7 +103,7 @@ void X2Focuser::driverInfoDetailedInfo(BasicStringInterface& str) const
         str = "Focuser X2 plugin by Rodolphe Pineau";
 }
 
-double X2Focuser::driverInfoVersion(void) const							
+double X2Focuser::driverInfoVersion(void) const
 {
 	return DRIVER_VERSION;
 }
@@ -114,17 +113,17 @@ void X2Focuser::deviceInfoNameShort(BasicStringInterface& str) const
     str="AAF2";
 }
 
-void X2Focuser::deviceInfoNameLong(BasicStringInterface& str) const				
+void X2Focuser::deviceInfoNameLong(BasicStringInterface& str) const
 {
     deviceInfoNameShort(str);
 }
 
-void X2Focuser::deviceInfoDetailedDescription(BasicStringInterface& str) const		
+void X2Focuser::deviceInfoDetailedDescription(BasicStringInterface& str) const
 {
 	str = "AAF2 Controller";
 }
 
-void X2Focuser::deviceInfoFirmwareVersion(BasicStringInterface& str)				
+void X2Focuser::deviceInfoFirmwareVersion(BasicStringInterface& str)
 {
     if(!m_bLinked) {
         str="NA";
@@ -138,7 +137,7 @@ void X2Focuser::deviceInfoFirmwareVersion(BasicStringInterface& str)
     }
 }
 
-void X2Focuser::deviceInfoModel(BasicStringInterface& str)							
+void X2Focuser::deviceInfoModel(BasicStringInterface& str)
 {
     str="AAF2";
 }
@@ -167,9 +166,11 @@ int	X2Focuser::terminateLink(void)
         return SB_OK;
 
     X2MutexLocker ml(GetMutex());
+    m_Aaf2Controller.haltFocuser();
     m_Aaf2Controller.Disconnect();
     m_bLinked = false;
-    return SB_OK;
+
+	return SB_OK;
 }
 
 bool X2Focuser::isLinked(void) const
@@ -224,14 +225,14 @@ int	X2Focuser::execModalSettingsDialog(void)
         dx->setEnabled("pushButtonSet2", false);
     }
 
-    // linit is done in software so it's always enabled.
-    dx->setEnabled("posLimit", true);
-    dx->setEnabled("limitEnable", true);
-    dx->setPropertyInt("posLimit", "value", m_Aaf2Controller.getPosLimit());
-    if(m_Aaf2Controller.isPosLimitEnabled())
-        dx->setChecked("limitEnable", true);
-    else
-        dx->setChecked("limitEnable", false);
+	// limit is done in software so it's always enabled.
+	dx->setEnabled("posLimit", true);
+	dx->setEnabled("limitEnable", true);
+	dx->setPropertyInt("posLimit", "value", m_Aaf2Controller.getPosLimit());
+	if(m_Aaf2Controller.isPosLimitEnabled())
+		dx->setChecked("limitEnable", true);
+	else
+		dx->setChecked("limitEnable", false);
 
 
 
@@ -248,7 +249,6 @@ int	X2Focuser::execModalSettingsDialog(void)
         bLimitEnabled = dx->isChecked("limitEnable");
         dx->propertyInt("posLimit", "value", nPosLimit);
         if(bLimitEnabled && nPosLimit>0) { // a position limit of 0 doesn't make sense :)
-            printf("Setting pos limit to %d\n", nPosLimit);
             m_Aaf2Controller.setPosLimit(nPosLimit);
             m_Aaf2Controller.enablePosLimit(bLimitEnabled);
         } else {
@@ -296,13 +296,13 @@ int	X2Focuser::focPosition(int& nPosition)
     return nErr;
 }
 
-int	X2Focuser::focMinimumLimit(int& nMinLimit) 		
+int	X2Focuser::focMinimumLimit(int& nMinLimit)
 {
 	nMinLimit = 0;
     return SB_OK;
 }
 
-int	X2Focuser::focMaximumLimit(int& nPosLimit)			
+int	X2Focuser::focMaximumLimit(int& nPosLimit)
 {
 
 	X2MutexLocker ml(GetMutex());
@@ -312,12 +312,11 @@ int	X2Focuser::focMaximumLimit(int& nPosLimit)
 	else {
 		nPosLimit = 100000;
 	}
-	printf("focMaximumLimit nPosLimit = %d\n", nPosLimit);
 
-    return SB_OK;
+	return SB_OK;
 }
 
-int	X2Focuser::focAbort()								
+int	X2Focuser::focAbort()
 {   int nErr;
 
     if(!m_bLinked)
@@ -328,7 +327,7 @@ int	X2Focuser::focAbort()
     return nErr;
 }
 
-int	X2Focuser::startFocGoto(const int& nRelativeOffset)	
+int	X2Focuser::startFocGoto(const int& nRelativeOffset)
 {
     if(!m_bLinked)
         return NOT_CONNECTED;
@@ -347,8 +346,7 @@ int	X2Focuser::isCompleteFocGoto(bool& bComplete) const
 
     X2Focuser* pMe = (X2Focuser*)this;
     X2MutexLocker ml(pMe->GetMutex());
-
-    nErr = pMe->m_Aaf2Controller.isGoToComplete(bComplete);
+	nErr = pMe->m_Aaf2Controller.isGoToComplete(bComplete);
 
     return nErr;
 }
@@ -364,8 +362,8 @@ int	X2Focuser::endFocGoto(void)
     return nErr;
 }
 
-int X2Focuser::amountCountFocGoto(void) const					
-{ 
+int X2Focuser::amountCountFocGoto(void) const
+{
 	return 3;
 }
 
@@ -440,7 +438,7 @@ void X2Focuser::portNameOnToCharPtr(char* pszPort, const int& nMaxSize) const
 
     if (m_pIniUtil)
         m_pIniUtil->readString(PARENT_KEY, CHILD_KEY_PORTNAME, pszPort, pszPort, nMaxSize);
-    
+
 }
 
 

@@ -159,7 +159,6 @@ private:
     double                                  m_fLastTemp;
     CAaf2Controller                         m_Aaf2Controller;
     bool                                    mUiEnabled;
-
 };
 
 

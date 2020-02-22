@@ -4,7 +4,7 @@ PACKAGE_NAME="aaf2_X2.pkg"
 BUNDLE_NAME="org.rti-zone.aaf2X2"
 
 if [ ! -z "$app_id_signature" ]; then
-    codesign -s "$app_id_signature" ../build/Release/libaaf2.dylib
+    codesign -f -s "$app_id_signature" --verbose ../build/Release/libaaf2.dylib
 fi
 
 mkdir -p ROOT/tmp/aaf2_X2/

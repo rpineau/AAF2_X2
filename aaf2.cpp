@@ -317,7 +317,7 @@ int CAaf2Controller::getTemperature(double &dTemperature)
     // parse output to extract temp value.
     nErr = parseResponse(szResp, szTmpBuf, SERIAL_BUFFER_SIZE);
     // convert string value to double
-    dTemperature = atof(szTmpBuf);
+    dTemperature = atof(szTmpBuf)/100.0;
 
     return nErr;
 }

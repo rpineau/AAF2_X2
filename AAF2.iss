@@ -39,14 +39,19 @@ DirExistsWarning=no
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
+[Dirs]
+Name: "{app}\Plugins\FocuserPlugins";
+Name: "{app}\Plugins64\FocuserPlugins";
 
 [Files]
-; WIll also need to customise these!
-Source: "focuserlist aaf2.txt"; DestDir: "{app}\Miscellaneous Files"; Flags: ignoreversion
-Source: "libaaf2\Release\libaaf2.dll"; DestDir: "{app}\Plugins\FocuserPlugins"; Flags: ignoreversion
-Source: "aaf2.ui"; DestDir: "{app}\Plugins\FocuserPlugins"; Flags: ignoreversion
-; NOTE: Don't use "Flags: ignoreversion" on any shared system files
-; msgBox('Do you want to install MyProg.exe to ' + ExtractFilePath(CurrentFileName) + '?', mbConfirmation, MB_YESNO)
+Source: "focuserlist aaf2.txt";                 DestDir: "{app}\Miscellaneous Files"; Flags: ignoreversion
+Source: "focuserlist aaf2.txt";                 DestDir: "{app}\Miscellaneous Files"; Flags: ignoreversion; DestName: "focuserlist64 aaf2.txt"
+;32 bit
+Source: "libaaf2\Win32\Release\libaaf2.dll";    DestDir: "{app}\Plugins\FocuserPlugins"; Flags: ignoreversion
+Source: "aaf2.ui";                              DestDir: "{app}\Plugins\FocuserPlugins"; Flags: ignoreversion
+;64 bit
+Source: "libaaf2\x64\Release\libaaf2.dll";      DestDir: "{app}\Plugins64\FocuserPlugins"; Flags: ignoreversion; Check: DirExists(ExpandConstant('{app}\Plugins64\FocuserPlugins'))
+Source: "aaf2.ui";                              DestDir: "{app}\Plugins64\FocuserPlugins"; Flags: ignoreversion; Check: DirExists(ExpandConstant('{app}\Plugins64\FocuserPlugins'))
 
 
 [Code]
